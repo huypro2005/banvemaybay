@@ -1,4 +1,4 @@
-from .services import add_phieudatcho, Thanhtoan_phieudatcho_services, get_phieu_dat_cho
+from .services import add_phieudatcho, Thanhtoan_phieudatcho_services, get_phieu_dat_cho, get_ds_Phieudatcho_of_HK
 from flask import Blueprint, request, jsonify
 
 phieudatcho_bp = Blueprint('phieudatcho', __name__)
@@ -19,3 +19,9 @@ def thanhtoan_phieudatcho_route():
 
 def get_phieu_dat_cho_route(id):
     return get_phieu_dat_cho(id)
+
+
+@phieudatcho_bp.route('/api/phieudatcho/ds_phieudatcho_of_hk/<mahk>', methods = ['GET'])
+def get_ds_Phieudatcho_of_HK_route(mahk):
+    return get_ds_Phieudatcho_of_HK(mahk)
+

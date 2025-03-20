@@ -175,6 +175,9 @@ class Vechuyenbay(db.Model):
             return True
         except:
             return False
+    
+    # def get_ve_chuyen_bay(self):
+        
 
 
 class ChiTietChuyenBay(db.Model):

@@ -71,8 +71,10 @@ from datetime import datetime, timedelta
 def get_phieu_dat_cho(id):
     try:
         phieudatcho = PhieuDatCho.query.get(id)
+        hanhkhach = HanhKhach.query.get(phieudatcho.Ma_hanh_khach)
         return jsonify({
             'Ma_hanh_khach': phieudatcho.Ma_hanh_khach,
+            'Hoten': hanhkhach.Hoten,
             'Ma_chuyen_bay': phieudatcho.Ma_cb,
             'Ngay_dat': phieudatcho.Ngay_dat,
             'Tinh_trang': phieudatcho.Tinh_trang,
@@ -180,7 +182,12 @@ def Thanhtoan_phieudatcho_services():
             except:
                 return jsonify({'message': 'Lỗi truy cập phiếu đặt chỗ'}), 400
                               
+            if phieudatcho.Tinh_trang == 1:
+                return jsonify({'message': 'Phiếu đặt chỗ đã thanh toán rồi'}), 400
             
+            if phieudatcho.Tinh_trang == 2:
+                return jsonify({'message': 'Phiếu đặt chỗ đã bị hủy'}), 400
+
             vechuyenbay = Vechuyenbay()
 
             try:
@@ -194,8 +201,17 @@ def Thanhtoan_phieudatcho_services():
                 
                 if phieudatcho.set_thanhtoan() == False:
                     return jsonify({'message': f'Lỗi cập nhật phiếu đặt chỗ'}), 400  
+                
+                data = {
+                    'Ma_ve': vechuyenbay.id,
+                    'Ma_chuyen_bay': vechuyenbay.Ma_chuyen_bay,
+                    'Hang_ve': vechuyenbay.hang_ve,
+                    'Tien_ve': vechuyenbay.Tien_ve,
+                    'Ma_hanh_khach': vechuyenbay.Ma_hanh_khach
+                }
 
-                return jsonify({'message': 'Thanh toán thành công'}), 200
+                return jsonify({'message': 'Thanh toán thành công', 'vecb': data,
+                                'Ma_hoadon': hoadon.id}), 200
         
             except Exception as e:
                 db.session.rollback()
@@ -207,4 +223,21 @@ def Thanhtoan_phieudatcho_services():
     except:
         error_message = traceback.format_exc()
         return jsonify({'message': f'Lỗi không xác định: {error_message}'}), 400
+    
+def get_ds_Phieudatcho_of_HK(mahk):
+    try:
+        ds = PhieuDatCho.query.filter_by(Ma_hanh_khach=mahk).all()
+        data = []
+        for phieudatcho in ds:
+            data.append({
+                'Ma_phieu': phieudatcho.id,
+                'Ma_chuyen_bay': phieudatcho.Ma_cb,
+                'Ngay_dat': phieudatcho.Ngay_dat,
+                'Tinh_trang': phieudatcho.Tinh_trang,
+                'Hang_ve': phieudatcho.hang_ve,
+                'Ma_hanh_khach': phieudatcho.Ma_hanh_khach
+            })
+        return jsonify({'ds': data})
+    except Exception as e:
+        return jsonify({'message': f'Lỗi truy cập phiếu đặt chỗ: {e}'})
     

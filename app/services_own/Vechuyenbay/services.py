@@ -61,7 +61,7 @@ def update_tinhtrang_dahuy(vecb : Vechuyenbay):
 def get_ve_chuyen_bay(id):
     ve_chuyen_bay = Vechuyenbay.query.get(id)
     if ve_chuyen_bay:
-        return jsonify({'Ma_chuyen_bay': ve_chuyen_bay.Ma_chuyen_bay, 'hang_ve': ve_chuyen_bay.hang_ve, 'Tien_ve': ve_chuyen_bay.Tien_ve, 'Ma_hanh_khach': ve_chuyen_bay.Ma_hanh_khach}), 200
+        return jsonify({'Ma_chuyen_bay': ve_chuyen_bay.Ma_chuyen_bay, 'hang_ve': ve_chuyen_bay.hang_ve, 'vi_tri': ve_chuyen_bay.vi_tri, 'Ma_hanh_khach': ve_chuyen_bay.Ma_hanh_khach}), 200
     return jsonify({'message': 'Khong tim thay ve chuyen bay'}), 404
 # Compare this snippet from banvemaybay/app/check/Vechuyenbay/services.py:
 
@@ -74,3 +74,4 @@ def add_ve_cb(Ma_chuyen_bay, hang_ve, Tien_ve, Tinh_trang):
         return True
     except:
         return False
+    

@@ -36,3 +36,15 @@ def add_hk(hoten, cmnd, sdt, gioitinh, ngaydangky):
         return True
     except:
         return False
+    
+def get_hanhkhach_by_cmnd(cmnd):
+    try:
+        hanhkhach = HanhKhach.query.filter_by(cmnd = cmnd).first()
+        return jsonify({'id': hanhkhach.id,
+                        'Hoten': hanhkhach.Hoten,
+                        'cmnd': hanhkhach.cmnd, 
+                        'sdt': hanhkhach.sdt, 
+                        'gioi_tinh': hanhkhach.gioi_tinh
+                    })
+    except Exception as e:
+        return jsonify({'message': f'Error: {e}'})
