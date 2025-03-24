@@ -65,6 +65,7 @@ class Chuyenbay(db.Model):
     so_ghe_hang1 = db.Column(db.Integer)
     so_ghe_hang2 = db.Column(db.Integer)
     tong_so_ghe = db.Column(db.Integer)
+    clear = db.Column(db.Boolean, default = False, nullable = True)
 
     def __repr__(self):
         return str(self.Ma_san_bay_di) + ' - ' + str(self.Ma_san_bay_den)
@@ -115,7 +116,7 @@ class PhieuDatCho(db.Model):
     def __repr__(self):
         return f'{self.Ma_hanh_khach} - {self.Ma_vecb} - {self.Ma_chuyen_bay} - {self.Ngay_dat} - {self.Tinh_trang} - {self.Ghi_chu} - {self.tra_tien}'
     
-    def set_huyve(self):
+    def set_huy(self):
         try:
             self.Tinh_trang = 2
             db.session.commit()
@@ -277,6 +278,8 @@ class QuyDinh(db.Model):
     Thoigiandungtoida = db.Column(db.Integer, default = 20)
     Phantramgia1 = db.Column(db.Float, default = 105)
     Phantramgia2 = db.Column(db.Float, default = 100)
+    Time_max_phieu_het_han = db.Column(db.Integer, default = 1) # Thoi gian dat ve toi da
+    
     # Soluonghangve = db.Column(db.Integer, default = 2)
 
         
