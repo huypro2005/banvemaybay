@@ -4,6 +4,9 @@ from flask import Blueprint, request, jsonify
 phieudatcho_bp = Blueprint('phieudatcho', __name__)
 
 
+
+
+
 @phieudatcho_bp.route('/api/phieudatcho/add', methods = ['POST'])
 def add_phieudatcho_route():
     return add_phieudatcho()

@@ -2,6 +2,7 @@ from pdb import runcall
 from src.models import PhieuDatCho, HanhKhach, Vechuyenbay, Chuyenbay, QuyDinh, Hoadon
 from library import *
 from datetime import datetime, timedelta
+from time import sleep
 
 
 
@@ -177,14 +178,3 @@ def get_ds_Phieudatcho_of_HK(mahk):
 
 
 
-
-def check_phieu_chua_thanhtoan():
-    try:
-        ds = PhieuDatCho.query.filter(Tinh_trang=0).all()
-        for phieudatcho in ds:
-            if datetime.utcnow() - phieudatcho.Ngay_dat > timedelta(days=1):
-                phieudatcho.Tinh_trang = 2
-                db.session.commit()
-        return jsonify({'message': 'Cập nhật thành công'})
-    except Exception as e:
-        return jsonify({'message': f'Lỗi cập nhật phiếu đặt chỗ: {e}'})
