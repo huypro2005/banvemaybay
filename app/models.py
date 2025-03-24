@@ -1,3 +1,4 @@
+from sqlalchemy import true
 from app import db
 from datetime import datetime
 # QĐ1: Có 10 sân bay. Thời gian bay tối thiểu là 30 phút. Có tối đa 2 sân bay trung gian với thời gian dừng từ 10 đến 20 phút.
@@ -160,8 +161,10 @@ class Vechuyenbay(db.Model):
 
 
 
+    __table_args__ = (db.UniqueConstraint('Ma_chuyen_bay', 'vi_tri', name ='uq_machuyenbay_vitri'),) # Đảm bảo không có 2 vé giống nhau trong 1 chuyến bay
+
     def __repr__(self):
-        return f"{self.Ma_chuyen_bay} - {self.hang_ve}"  # Sửa cách nối chuỗi
+        return f"{self.Ma_chuyen_bay} - {self.hang_ve} - {self.vi_tri}"  # Sửa cách nối chuỗi
 
     def create_ve_by_phieudat(self, phieudat: PhieuDatCho):
         try:
@@ -197,6 +200,30 @@ class ChiTietChuyenBay(db.Model):
     #     return True
     
 
+class Nhanvien(db.Model):
+    __tablename__ = 'nhan_vien'
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(80))
+    username = db.Column(db.String(50), unique = True)
+    password = db.Column(db.Text)
+    email = db.Column(db.String(120), unique = True)
+    pos = db.Column(db.Integer)
+
+    def __repr__(self):
+        return self.name
+    
+    def create_user(self, name, username, password, email):
+        self.name = name
+        self.username = username
+        self.password = password 
+        self.email = email
+        try:
+            db.session.add(self)
+            db.session.commit()
+            return True
+        except:
+            return False
+
 
 
 class Hoadon(db.Model):
@@ -204,6 +231,7 @@ class Hoadon(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     Ma_hanh_khach = db.Column(db.Integer, db.ForeignKey('hanh_khach.id'))
     Ma_ve_cb = db.Column(db.Integer, db.ForeignKey('ve_chuyen_bay.id'))
+    Ma_nhan_vien = db.Column(db.Integer, db.ForeignKey('nhan_vien.id'), nullable = True)
     Loai_hoa_don = db.Column(db.Boolean, default = False) # 0: Thanh toan , 1: Hoan tien
     Ngay_lap = db.Column(db.DateTime, default = datetime.now)
     Thanh_tien = db.Column(db.Float)
@@ -222,15 +250,24 @@ class Hoadon(db.Model):
 
 
 
-class doanhThu(db.Model):
-    __tablename__ = 'doanh_thu'
+class doanhThuThang(db.Model):
+    __tablename__ = 'doanh_thu_thang'
     id = db.Column(db.Integer, primary_key=True)
     Tong_doanh_thu = db.Column(db.Float)
-    ThoiGian = db.Column(db.DateTime, default = datetime.now)
+    month = db.Column(db.Integer)
+    year = db.Column(db.Integer)
+    def __repr__(self):
+        return f'{self.Tong_doanh_thu} - {self.month} - {self.year}'
+    
+class doanhThuNam(db.Model):
+    __tablename__ = "doanh_thu_nam"
+    id = db.Column(db.Integer, primary_key = True)
+    Tong_doanh_thu = db.Column(db.Float)
+    year = db.Column(db.Integer)
 
     def __repr__(self):
-        return f'{self.Tong_doanh_thu} - {self.ThoiGian}'
-    
+        return f'{self.Tong_doanh_thu} - {self.year}'
+
 class QuyDinh(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     Soluongsanbay = db.Column(db.Integer, default = 10)

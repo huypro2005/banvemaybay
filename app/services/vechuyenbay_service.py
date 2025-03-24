@@ -14,7 +14,6 @@ rule = QuyDinh.query.first()
 def add_ve():
     try:
         data = request.get_json()
-        mavcb = data['Ma_ve_cb']
         macb = data['Ma_cb']
         Hoten = data['Ho_ten']
         cmnd = data['cmnd']
@@ -42,11 +41,9 @@ def add_ve():
 
         
 
-        hanhkhach = HanhKhach.query.filter_by(cmnd = cmnd, Hoten = Hoten).first()
+        hanhkhach = HanhKhach.query.filter_by(cmnd = cmnd).first()
+        
         if hanhkhach:
-            hanhkhach.sdt = sdt
-            hanhkhach.gioi_tinh = gioi_tinh
-            db.session.commit()
             ma_hanh_khach = hanhkhach.id
         else:
             hanhkhach = HanhKhach(Hoten= Hoten, cmnd = cmnd, sdt = sdt, gioi_tinh = gioi_tinh)
@@ -57,10 +54,10 @@ def add_ve():
         if ma_hanh_khach == '':
             return jsonify({'message': 'Lỗi'}), 400
         
-        ve = Vechuyenbay(id = mavcb, Ma_chuyen_bay = macb, Ma_hanh_khach = ma_hanh_khach, Hang_ve = hang_ve, Tinh_trang = True, vi_tri = vitri)
+        ve = Vechuyenbay(Ma_chuyen_bay = macb, Ma_hanh_khach = ma_hanh_khach, Hang_ve = hang_ve, Tinh_trang = True, vi_tri = vitri)
         db.session.add(ve)
         db.session.commit()
-        if add_Hoadon(ma_hanh_khach, mavcb, 0, datetime.utcnow(), giave):
+        if add_Hoadon(ma_hanh_khach, ve.id, 0, datetime.utcnow(), giave):
             return jsonify({'message': 'Đặt vé thành công', 'Giá vé': giave}), 200        
         return jsonify({'message': 'Lỗi'}), 400
     except:

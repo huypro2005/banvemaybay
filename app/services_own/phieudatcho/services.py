@@ -2,70 +2,7 @@ from pdb import runcall
 from app.models import PhieuDatCho, HanhKhach, Vechuyenbay, Chuyenbay, QuyDinh, Hoadon
 from library import *
 from datetime import datetime, timedelta
-# from extension import db
-# from Chuyenbay.services import update_chuyenbay_daban, update_chuyenbay_dahuy
-# from Vechuyenbay.services import update_tinhtrang_daban, update_tinhtrang_dahuy
 
-# def add_phieu_dat_cho():
-#     data = request.json
-#     if data and 'Ma_hanh_khach' in data and 'Ma_ve_chuyen_bay' in data :
-#         Ma_hanh_khach = data['Ma_hanh_khach']
-#         Ma_ve_chuyen_bay = data['Ma_ve_chuyen_bay']
-#         ngay_dat = datetime.strptime(data['ngay_dat'], '%Y-%m-%d %H:%M:%S')
-        
-#         hanhkhach = HanhKhach.query.get(Ma_hanh_khach)
-#         vecb = Vechuyenbay.query.get(Ma_ve_chuyen_bay)
-#         chuyenbay = Chuyenbay.query.get(vecb.Ma_chuyen_bay)
-        
-#         if not hanhkhach or not vecb:
-#             return jsonify({'message': 'Ma hanh khach hoac ma ve chuyen bay khong ton tai'})
-        
-#         if vecb.Tinh_trang == True:
-#             return jsonify({'message': 'Ve chuyen bay da ban'})
-
-#         if ngay_dat >= chuyenbay.ngay_gio - timedelta(days = 1):  
-#             return jsonify({'message': 'Ngay dat phai nho hon ngay gio khoi hanh it nhat 1 ngay'})
-        
-#         Tinh_trang = 0
-#         ghichu = ''
-#         tratien = vecb.Tien_ve
-#         try:
-#             phieudatcho = PhieuDatCho(Ma_hanh_khach = Ma_hanh_khach, Ma_vecb = Ma_ve_chuyen_bay, Ngay_dat = ngay_dat, Tinh_trang = Tinh_trang, Ghi_chu = ghichu, Tra_tien = tratien)
-#             db.session.add(phieudatcho)
-#             db.session.commit()
-#             if update_tinhtrang_daban(vecb):
-#                 if update_chuyenbay_daban(chuyenbay):
-#                     return jsonify({'message': 'Them phieu dat cho thanh cong'})
-#                 else:
-#                     update_tinhtrang_dahuy(vecb)
-#                     db.session.delete(phieudatcho)
-#                     return jsonify({'message': 'Cap nhat chuyen bay that bai'})
-#             return jsonify({'message': 'Them phieu dat cho thanh cong'})
-#         except:
-#             return jsonify({'message': 'Them phieu dat cho that bai'})
-        
-#     else:
-#         return jsonify({'message': 'Thieu thong tin'})
-
-
-
-# def Delete_or_confirm_phieu_dat_cho(phieudatcho: PhieuDatCho):
-#     try:
-#         vecb = Vechuyenbay.query.get(phieudatcho.Ma_vecb)
-#         chuyenbay = Chuyenbay.query.get(vecb.Ma_chuyen_bay)
-#         if phieudatcho.Tinh_trang == 0:
-#             if update_tinhtrang_dahuy(vecb):
-#                 if update_chuyenbay_dahuy(chuyenbay):
-#                     db.session.delete(phieudatcho)
-#                     db.session.commit()
-#                     return True
-#                 else:
-#                     update_tinhtrang_daban(vecb)
-#                     return False
-#             return False
-#         return False
-#     except:
-#         return False
 
 
 def get_phieu_dat_cho(id):
@@ -88,10 +25,9 @@ def get_phieu_dat_cho(id):
     
 
 def add_phieudatcho():
-    try:
-        rule = QuyDinh.query.first()
-    except:
-        return jsonify({'message': "Lỗi truy cập quy định"}), 400
+    rule = QuyDinh.query.first_or_404()
+    if rule is None:
+        return jsonify({'message': 'Lỗi truy cập quy định.'}), 500
     try:
         data = request.get_json()
 
@@ -150,7 +86,7 @@ def add_phieudatcho():
                                 vi_tri = vi_tri)
         db.session.add(phieudatcho)
         db.session.commit()
-        return jsonify({'message': 'Đặt chỗ thành công. Vui lòng thanh toán trong 24h tới nếu không phiếu đặt chỗ sẽ bị hủy.'}), 200
+        return jsonify({'message': f'Đặt chỗ thành công. Vui lòng thanh toán {phieudatcho.tra_tien}VND trong 24h tới nếu không phiếu đặt chỗ sẽ bị hủy.'}), 200
 
 
 
@@ -175,50 +111,47 @@ def add_phieudatcho():
 def Thanhtoan_phieudatcho_services():
     try:
         data = request.get_json()
-        if data and 'Ma_phieu' in data:
-            Ma_phieu = data['Ma_phieu']
-            try:
-                phieudatcho = PhieuDatCho.query.get(Ma_phieu)
-            except:
-                return jsonify({'message': 'Lỗi truy cập phiếu đặt chỗ'}), 400
-                              
-            if phieudatcho.Tinh_trang == 1:
-                return jsonify({'message': 'Phiếu đặt chỗ đã thanh toán rồi'}), 400
-            
-            if phieudatcho.Tinh_trang == 2:
-                return jsonify({'message': 'Phiếu đặt chỗ đã bị hủy'}), 400
 
-            vechuyenbay = Vechuyenbay()
-
-            try:
-            
-                if vechuyenbay.create_ve_by_phieudat(phieudatcho) == False:
-                    return jsonify({'message': f'Lỗi tạo vé chuyến bay'}), 400
-
-                hoadon = Hoadon()
-                if hoadon.Add_hoadon(vechuyenbay) == False:
-                    return jsonify({'message': f'Lỗi tạo hóa đơn'}), 400
-                
-                if phieudatcho.set_thanhtoan() == False:
-                    return jsonify({'message': f'Lỗi cập nhật phiếu đặt chỗ'}), 400  
-                
-                data = {
-                    'Ma_ve': vechuyenbay.id,
-                    'Ma_chuyen_bay': vechuyenbay.Ma_chuyen_bay,
-                    'Hang_ve': vechuyenbay.hang_ve,
-                    'Tien_ve': vechuyenbay.Tien_ve,
-                    'Ma_hanh_khach': vechuyenbay.Ma_hanh_khach
-                }
-
-                return jsonify({'message': 'Thanh toán thành công', 'vecb': data,
-                                'Ma_hoadon': hoadon.id}), 200
+        if 'Ma_phieu' not in data:
+            return jsonify({'message': 'Thiếu thông tin'}), 400
         
-            except Exception as e:
-                db.session.rollback()
-                return jsonify({'message': f'Lỗi không xác định: {e}'}), 400
-            
+        Ma_phieu = data['Ma_phieu']
 
-        return jsonify({'message': 'Nhập phiếu đặt chỗ vào'}), 400       
+        phieudatcho = PhieuDatCho.query.get(Ma_phieu)
+
+        if phieudatcho is None:
+            return jsonify({'message': 'Lỗi truy cập phiếu đặt chỗ'}), 400
+                            
+        if phieudatcho.Tinh_trang == 1:
+            return jsonify({'message': 'Phiếu đặt chỗ đã thanh toán rồi'}), 400
+        
+        if phieudatcho.Tinh_trang == 2:
+            return jsonify({'message': 'Phiếu đặt chỗ đã bị hủy'}), 400
+
+        vechuyenbay = Vechuyenbay()
+
+        
+        if vechuyenbay.create_ve_by_phieudat(phieudatcho) == False:
+            return jsonify({'message': f'Lỗi tạo vé chuyến bay'}), 400
+
+        hoadon = Hoadon()
+        if hoadon.Add_hoadon(vechuyenbay) == False:
+            return jsonify({'message': f'Lỗi tạo hóa đơn'}), 400
+        
+        if phieudatcho.set_thanhtoan() == False:
+            return jsonify({'message': f'Lỗi cập nhật phiếu đặt chỗ'}), 400  
+        
+        data = {
+            'Ma_ve': vechuyenbay.id,
+            'Ma_chuyen_bay': vechuyenbay.Ma_chuyen_bay,
+            'Hang_ve': vechuyenbay.hang_ve,
+            'Tien_ve': vechuyenbay.Tien_ve,
+            'Ma_hanh_khach': vechuyenbay.Ma_hanh_khach
+        }
+
+        return jsonify({'message': 'Thanh toán thành công', 'vecb': data,
+                        'Ma_hoadon': hoadon.id}), 200
+        
 
     except:
         error_message = traceback.format_exc()
@@ -241,3 +174,17 @@ def get_ds_Phieudatcho_of_HK(mahk):
     except Exception as e:
         return jsonify({'message': f'Lỗi truy cập phiếu đặt chỗ: {e}'})
     
+
+
+
+
+def check_phieu_chua_thanhtoan():
+    try:
+        ds = PhieuDatCho.query.filter(Tinh_trang=0).all()
+        for phieudatcho in ds:
+            if datetime.utcnow() - phieudatcho.Ngay_dat > timedelta(days=1):
+                phieudatcho.Tinh_trang = 2
+                db.session.commit()
+        return jsonify({'message': 'Cập nhật thành công'})
+    except Exception as e:
+        return jsonify({'message': f'Lỗi cập nhật phiếu đặt chỗ: {e}'})

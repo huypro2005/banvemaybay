@@ -45,5 +45,12 @@ def get_QuyDinh():
         rule = QuyDinh.query.first()
     except:
         return jsonify({'message': 'Co loi xay ra'}), 500
-    return jsonify({'Soluongsanbay': rule.Soluongsanbay, 'Thoigianbaytoithieu': rule.Thoigianbaytoithieu, 'Soluongsanbaytrunggian': rule.Soluongsanbaytrunggian, 'Thoigiandungtoithieu': rule.Thoigiandungtoithieu, 'Thoigiandungtoida': rule.Thoigiandungtoida})
+    return jsonify({'Soluongsanbay': rule.Soluongsanbay, 
+                    'Thoigianbaytoithieu': rule.Thoigianbaytoithieu, 
+                    'Soluongsanbaytrunggian': rule.Soluongsanbaytrunggian,
+                      'Thoigiandungtoithieu': rule.Thoigiandungtoithieu, 
+                      'Thoigiandungtoida': rule.Thoigiandungtoida,
+                      'Phantramgia1': rule.Phantramgia1,
+                        'Phantramgia2': rule.Phantramgia2
+                    })
 # Compare this snippet from banvemaybay/app/services_own/Quydinh/controller.py:

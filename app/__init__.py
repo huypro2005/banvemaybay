@@ -9,6 +9,7 @@ from .services_own.Hanhkhach.controller import HANHKHACH
 from .services_own.Chuyenbay.controller import chuyenbay_bp
 from .services_own.phieudatcho.controller import phieudatcho_bp
 from .services_own.Vechuyenbay.controller import vechuyenbay_bp
+from .services_own.Quydinh.controller import QUYDINH
 import os
 
 
@@ -34,4 +35,5 @@ def create_app(config_file = 'config.py'):
     app.register_blueprint(phieudatcho_bp)
     app.register_blueprint(vechuyenbay_bp)
     app.register_blueprint(HANHKHACH)
+    app.register_blueprint(QUYDINH)
     return app

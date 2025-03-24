@@ -16,3 +16,16 @@ def add_Maybay():
     return jsonify({'message': 'request fail'})
 
 
+
+def get_Maybay():
+    try:
+        ds = Maybay.query.all()
+        data = []
+        for item in ds:
+            data.append({
+                'id': item.id,
+                'ten_may_bay': item.ten_may_bay
+            })
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'message': f'Error: {e}'})

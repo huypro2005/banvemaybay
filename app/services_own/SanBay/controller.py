@@ -14,3 +14,5 @@ def add_san_bay_route():
 @SANBAY.route(f'/{s}/get_all', methods = ['GET'])
 def get_all_san_bay_route():
     return get_all_san_bay()
+
+
